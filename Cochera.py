@@ -1,12 +1,11 @@
 import streamlit as st
 import os
-from PIL import Image
 
 # 1. CONFIGURACIÓN Y ESTADO INICIAL
 st.set_page_config(page_title="Visualizador Cesar", page_icon="🏠", layout="wide")
 PASSWORD_CORRECTA = "CesarM"
 
-# Diccionario Global de Frases
+# Diccionario Global de Frases (Disponible para Web y Móvil)
 frases = {
     "ConAlero": "Con este alero ganas un resguardo climático adicional.",
     "SinAlero": "Consigues pureza formal y fluidez espacial.",
@@ -42,7 +41,7 @@ if not st.session_state.autenticado:
                 st.error("Contraseña incorrecta")
     st.stop()
 
-# --- FUNCIÓN DE RUTAS SEGURAS ---
+# --- FUNCIÓN DE RUTAS SEGURAS (OPTIMIZADA CON CACHÉ) ---
 @st.cache_data
 def get_path_safe(v_target, cub, sop, rev, color_nom):
     CARPETA_IMAGENES = os.path.join(os.path.dirname(__file__), "renders")
@@ -51,8 +50,7 @@ def get_path_safe(v_target, cub, sop, rev, color_nom):
     intentos = [v_target, v_target.replace("Cam", "Camera")]
     for cam_var in intentos:
         ruta = os.path.join(CARPETA_IMAGENES, f"{cub}_{sop}_{rev}_{cam_var}_{color_upper}.jpg")
-        if os.path.exists(ruta): 
-            return ruta
+        if os.path.exists(ruta): return ruta
     return None
 
 # ==========================================
@@ -62,42 +60,29 @@ if st.session_state.modo_dispositivo == "Computadora (Web Completa)":
     st.markdown("""
         <style>
         .stApp { background-color: #050505; color: #E0E0E0; font-family: 'Segoe UI', sans-serif; }
-        .main-title { background: linear-gradient(90deg, #00FF00, #00CC00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 28px !important; font-weight: 800; margin-bottom: 0px; }
-        .phrase-box { color: #FFB347; font-style: italic; font-size: 17px !important; border-left: 3px solid #FF8C00; padding-left: 12px; min-height: 40px; margin-top: 10px; }
+        .main-title { background: linear-gradient(90deg, #00FF00, #00CC00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 28px !important; font-weight: 800; }
+        .phrase-box { color: #FFB347; font-style: italic; font-size: 17px !important; border-left: 3px solid #FF8C00; padding-left: 12px; min-height: 40px; }
         .stSelectbox { margin-bottom: -12px !important; max-width: 50% !important; }
-        
         button[key^="btn_"] { width: 38px !important; height: 38px !important; border-radius: 50% !important; border: 2px solid #555 !important; color: white !important; font-weight: bold !important; transition: 0.3s; }
         button[key="btn_negro"] { background-color: #222325 !important; }
         button[key="btn_gris"] { background-color: #6b6c6f !important; }
         button[key="btn_rojo"] { background-color: #392424 !important; }
-        
         .color-block { width: 100%; height: 28px; border-radius: 4px; border: 1px solid #333; margin-top: 5px; }
         .bg-negro { background-color: #000000; } .bg-gris { background-color: #808080; } .bg-rojo { background-color: #8B0000; }
-        
         .stButton button:not([key^="btn_"]):not([key^="m_"]):not([key="btn_rotar_vista"]) { width: 100% !important; background-color: #111 !important; color: #00FF00 !important; border-radius: 4px; height: 30px !important; font-size: 11px !important; }
-        
-        div[data-baseweb="select"] input { caret-color: transparent !important; pointer-events: none !important; }
-        div[data-baseweb="select"] { cursor: pointer !important; }
         [data-testid="stStatusWidget"], [data-testid="stHeader"] { display: none !important; }
         </style>
     """, unsafe_allow_html=True)
 
     col_visor, col_ctrl = st.columns([3, 2])
-    
     with col_ctrl:
-        # Fila superior: Título y Logo
+        # --- FILA SUPERIOR CON LOGO ---
         c_tit, c_log = st.columns([3, 1])
-        
         with c_tit:
             st.markdown("<p class='main-title'>VISUALIZADOR PARA CESAR 🏠🚗</p>", unsafe_allow_html=True)
-        
         with c_log:
-            # USANDO RUTA DIRECTA (Ya que confirmamos que está ahí)
             if os.path.exists("logo.png"):
                 st.image("logo.png", use_container_width=True)
-            else:
-                # Si esto sale, es que Streamlit está ejecutando el código desde otra carpeta
-                st.error("Archivo no detectado")
 
         st.markdown(f"<p class='phrase-box'>{st.session_state.ultima_frase}</p>", unsafe_allow_html=True)
         st.markdown("<hr>", unsafe_allow_html=True)
@@ -114,7 +99,7 @@ if st.session_state.modo_dispositivo == "Computadora (Web Completa)":
         with c_c:
             st.markdown("<div style='margin-top: 32px;'></div>", unsafe_allow_html=True)
             for k, l, cl, f in [("btn_negro","N","bg-negro","negro"), ("btn_gris","G","bg-gris","gris"), ("btn_rojo","R","bg-rojo","rojo")]:
-                r1, r2 = st.columns([0.6, 1.1])
+                r1, r2 = st.columns([0.5, 1.2])
                 with r1: 
                     if st.button(l, key=k): st.session_state.color=f; st.session_state.ultima_frase=frases[f]; st.rerun()
                 with r2: st.markdown(f"<div class='color-block {cl}'></div>", unsafe_allow_html=True)
@@ -138,24 +123,37 @@ if st.session_state.modo_dispositivo == "Computadora (Web Completa)":
 # OPCIÓN B: MODO CELULAR (MÓVIL)
 # ==========================================
 else:
-    st.markdown("<style>.stApp { background-color: #050505; color: #E0E0E0; } [data-testid='stHeader'] { display: none !important; }</style>", unsafe_allow_html=True)
-    
+    st.markdown("""
+        <style>
+        .stApp { background-color: #050505; color: #E0E0E0; }
+        .block-container { padding-top: 0rem !important; }
+        .main-title-m { background: linear-gradient(90deg, #00FF00, #00CC00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 20px !important; font-weight: 800; text-align: center; margin-top: 10px; }
+        .phrase-box-m { color: #FFB347; font-style: italic; font-size: 14px !important; text-align: center; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 15px; }
+        [data-testid="stStatusWidget"], [data-testid="stHeader"] { display: none !important; }
+        </style>
+    """, unsafe_allow_html=True)
+
     # Logo en móvil
-    logo_m = os.path.join(os.path.dirname(__file__), "logo.png")
-    if os.path.exists(logo_m):
+    if os.path.exists("logo.png"):
         _, mid, _ = st.columns([1, 2, 1])
-        with mid: st.image(logo_m, use_container_width=True)
+        with mid: st.image("logo.png", use_container_width=True)
 
-    st.markdown(f"<h2 style='text-align:center; color:#00FF00;'>VISUALIZADOR CESAR</h2>", unsafe_allow_html=True)
+    st.markdown(f"<p class='main-title-m'>VISUALIZADOR PARA CESAR 🏠🚗</p>", unsafe_allow_html=True)
+    st.markdown(f"<p class='phrase-box-m'>{st.session_state.ultima_frase}</p>", unsafe_allow_html=True)
     
-    m_cub = st.selectbox("CUBIERTA", ["ConAlero", "SinAlero"], key="mc")
-    m_sop = st.selectbox("SOPORTES", ["Eficientes", "Dinamicos"], key="ms")
-    m_rev = st.selectbox("REVESTIMIENTO", ["Ninguno", "Poco", "Mucho"], key="mr")
+    m_cub = st.selectbox("CUBIERTA", ["ConAlero", "SinAlero"], key="mc", format_func=lambda x: "Compacta" if x=="SinAlero" else "Extendida")
+    m_sop = st.selectbox("SOPORTES", ["Eficientes", "Dinamicos"], key="ms", format_func=lambda x: "Esencial" if x=="Eficientes" else "Dinámico")
+    m_rev = st.selectbox("REVESTIMIENTO", ["Ninguno", "Poco", "Mucho"], key="mr", format_func=lambda x: "Base" if x=="Ninguno" else ("Parcial" if x=="Poco" else "Completo"))
 
-    if st.button(f"🎨 CAMBIAR COLOR (Actual: {st.session_state.color})"):
-        ciclo = ["negro", "gris", "rojo"]
-        st.session_state.color = ciclo[(ciclo.index(st.session_state.color) + 1) % 3]
-        st.rerun()
+    c_btn1, c_btn2 = st.columns(2)
+    with c_btn1:
+        if st.button("🎨 COLOR", use_container_width=True):
+            ciclo = ["negro", "gris", "rojo"]; st.session_state.color = ciclo[(ciclo.index(st.session_state.color) + 1) % 3]
+            st.session_state.ultima_frase = frases[st.session_state.color]; st.rerun()
+    with c_btn2:
+        if st.button("🔄 VISTA", use_container_width=True):
+            v_ciclo = ["Cam", "Cam_001", "Cam_002"]; st.session_state.vista = v_ciclo[(v_ciclo.index(st.session_state.vista) + 1) % 3]; st.rerun()
 
     img_m = get_path_safe(st.session_state.vista, m_cub, m_sop, m_rev, st.session_state.color)
     if img_m: st.image(img_m, use_container_width=True)
+    
