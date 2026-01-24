@@ -28,12 +28,15 @@ if 'ultima_frase' not in st.session_state: st.session_state.ultima_frase = "Prue
 
 # --- FUNCIÓN PARA EL LOGO ---
 def mostrar_logo():
-    """Busca el logo y lo despliega"""
-    logo_path = "COCHERA-PARA-CESAR/logo.png" 
+    # Esta línea busca la carpeta actual del script y le pega el nombre del logo
+    ruta_actual = os.path.dirname(__file__)
+    logo_path = os.path.join(ruta_actual, "logo.png") # <--- Asegúrate que se llame así
+    
     if os.path.exists(logo_path):
         st.image(logo_path, use_container_width=True)
     else:
-        # Si no hay imagen, un placeholder con el estilo de la marca
+        # Esto te servirá de guía: si no lo encuentra, te dirá dónde lo está buscando
+        st.warning(f"No se encontró el logo en: {logo_path}")
         st.markdown("<h1 style='color: #00FF00; text-align: center;'>CESAR</h1>", unsafe_allow_html=True)
 
 # --- PANTALLA DE LOGIN ---
