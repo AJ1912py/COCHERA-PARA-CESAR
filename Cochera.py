@@ -5,7 +5,7 @@ import os
 st.set_page_config(page_title="Visualizador Cesar", page_icon="🏠", layout="wide")
 PASSWORD_CORRECTA = "CesarM"
 
-# Diccionario Global de Frases (Disponible para Web y Móvil)
+# Diccionario Global de Frases
 frases = {
     "ConAlero": "Con este alero ganas un resguardo climático adicional.",
     "SinAlero": "Consigues pureza formal y fluidez espacial.",
@@ -41,7 +41,7 @@ if not st.session_state.autenticado:
                 st.error("Contraseña incorrecta")
     st.stop()
 
-# --- FUNCIÓN DE RUTAS SEGURAS (OPTIMIZADA CON CACHÉ) ---
+# --- FUNCIÓN DE IMÁGENES CON CACHÉ ---
 @st.cache_data
 def get_path_safe(v_target, cub, sop, rev, color_nom):
     CARPETA_IMAGENES = os.path.join(os.path.dirname(__file__), "renders")
@@ -54,7 +54,7 @@ def get_path_safe(v_target, cub, sop, rev, color_nom):
     return None
 
 # ==========================================
-# OPCIÓN A: MODO COMPUTADORA (WEB) - AJUSTE DE ESPACIO
+# OPCIÓN A: MODO COMPUTADORA (WEB)
 # ==========================================
 if st.session_state.modo_dispositivo == "Computadora (Web Completa)":
     st.markdown("""
@@ -62,7 +62,6 @@ if st.session_state.modo_dispositivo == "Computadora (Web Completa)":
         .stApp { background-color: #050505; color: #E0E0E0; font-family: 'Segoe UI', sans-serif; }
         .main-title { background: linear-gradient(90deg, #00FF00, #00CC00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 28px !important; font-weight: 800; margin-bottom: 0px; }
         
-        /* Ajuste de la frase para que suba y no ocupe una fila entera */
         .phrase-box { 
             color: #FFB347; font-style: italic; font-size: 16px !important; 
             border-left: 3px solid #FF8C00; padding-left: 12px; 
@@ -84,78 +83,62 @@ if st.session_state.modo_dispositivo == "Computadora (Web Completa)":
     col_visor, col_ctrl = st.columns([3, 2])
     
     with col_ctrl:
-        # Título y Frase a la izquierda, Logo a la derecha
         c_textos, c_log = st.columns([3, 1])
         with c_textos:
             st.markdown("<p class='main-title'>VISUALIZADOR PARA CESAR 🏠🚗</p>", unsafe_allow_html=True)
             st.markdown(f"<p class='phrase-box'>{st.session_state.ultima_frase}</p>", unsafe_allow_html=True)
-        
         with c_log:
             if os.path.exists("logo.png"):
                 st.image("logo.png", use_container_width=True)
 
         st.markdown("<hr style='margin: 15px 0;'>", unsafe_allow_html=True)
         
-        # Selectores y Colores (Estructura original recuperada)
         c_m, c_c = st.columns([2.3, 1.2])
         with c_m:
             scub = st.selectbox("Cubierta", ["ConAlero", "SinAlero"], format_func=lambda x: "Compacta" if x=="SinAlero" else "Extendida")
-            if st.session_state.get('p_cub') != scub: 
-                st.session_state.ultima_frase = frases[scub]; st.session_state.p_cub = scub; st.rerun()
-            
+            if st.session_state.get('p_cub') != scub: st.session_state.ultima_frase = frases[scub]; st.session_state.p_cub = scub; st.rerun()
             ssop = st.selectbox("Soportes", ["Eficientes", "Dinamicos"], format_func=lambda x: "Esencial" if x=="Eficientes" else "Dinámico")
-            if st.session_state.get('p_sop') != ssop: 
-                st.session_state.ultima_frase = frases[ssop]; st.session_state.p_sop = ssop; st.rerun()
-            
+            if st.session_state.get('p_sop') != ssop: st.session_state.ultima_frase = frases[ssop]; st.session_state.p_sop = ssop; st.rerun()
             srev = st.selectbox("Revestimiento", ["Ninguno", "Poco", "Mucho"], format_func=lambda x: "Base" if x=="Ninguno" else ("Parcial" if x=="Poco" else "Completo"))
-            if st.session_state.get('p_rev') != srev: 
-                st.session_state.ultima_frase = frases[srev]; st.session_state.p_rev = srev; st.rerun()
+            if st.session_state.get('p_rev') != srev: st.session_state.ultima_frase = frases[srev]; st.session_state.p_rev = srev; st.rerun()
         
         with c_c:
             st.markdown("<div style='margin-top: 32px;'></div>", unsafe_allow_html=True)
             for k, l, cl, f in [("btn_negro","N","bg-negro","negro"), ("btn_gris","G","bg-gris","gris"), ("btn_rojo","R","bg-rojo","rojo")]:
                 r1, r2 = st.columns([0.6, 1.1])
                 with r1: 
-                    if st.button(l, key=k): 
-                        st.session_state.color=f; st.session_state.ultima_frase=frases[f]; st.rerun()
-                with r2: 
-                    st.markdown(f"<div class='color-block {cl}'></div>", unsafe_allow_html=True)
+                    if st.button(l, key=k): st.session_state.color=f; st.session_state.ultima_frase=frases[f]; st.rerun()
+                with r2: st.markdown(f"<div class='color-block {cl}'></div>", unsafe_allow_html=True)
 
         st.markdown("<hr style='margin: 15px 0;'>", unsafe_allow_html=True)
         
-        # Miniaturas (Vuelven a su posición original pero más arriba)
         v_ids = ["Cam", "Cam_001", "Cam_002"]
         v_noms = {"Cam": "VISTA OBLICUA", "Cam_001": "VISTA FRONTAL", "Cam_002": "VISTA LATERAL"}
         v_mins = [v for v in v_ids if v != st.session_state.vista]
         m1, m2 = st.columns(2)
         for i, vid in enumerate(v_mins):
             with [m1, m2][i]:
-                if st.button(v_noms[vid], key=f"wv_{vid}"): 
-                    st.session_state.vista=vid; st.rerun()
+                if st.button(v_noms[vid], key=f"wv_{vid}"): st.session_state.vista=vid; st.rerun()
                 p = get_path_safe(vid, scub, ssop, srev, st.session_state.color)
                 if p: st.image(p, use_container_width=True)
 
     with col_visor:
         img_p = get_path_safe(st.session_state.vista, scub, ssop, srev, st.session_state.color)
         if img_p: st.image(img_p, use_container_width=True)
+
 # ==========================================
-# OPCIÓN B: MODO CELULAR (MÓVIL)
+# OPCIÓN B: MODO CELULAR (MÓVIL) - SIN LOGO
 # ==========================================
 else:
     st.markdown("""
         <style>
         .stApp { background-color: #050505; color: #E0E0E0; }
-        .block-container { padding-top: 0rem !important; }
-        .main-title-m { background: linear-gradient(90deg, #00FF00, #00CC00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 20px !important; font-weight: 800; text-align: center; margin-top: 10px; }
+        .block-container { padding-top: 1rem !important; }
+        .main-title-m { background: linear-gradient(90deg, #00FF00, #00CC00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 22px !important; font-weight: 800; text-align: center; margin-top: 5px; }
         .phrase-box-m { color: #FFB347; font-style: italic; font-size: 14px !important; text-align: center; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 15px; }
         [data-testid="stStatusWidget"], [data-testid="stHeader"] { display: none !important; }
         </style>
     """, unsafe_allow_html=True)
-
-    # Logo en móvil
-    if os.path.exists("logo.png"):
-        _, mid, _ = st.columns([1, 2, 1])
-        with mid: st.image("logo.png", use_container_width=True)
 
     st.markdown(f"<p class='main-title-m'>VISUALIZADOR PARA CESAR 🏠🚗</p>", unsafe_allow_html=True)
     st.markdown(f"<p class='phrase-box-m'>{st.session_state.ultima_frase}</p>", unsafe_allow_html=True)
@@ -175,4 +158,3 @@ else:
 
     img_m = get_path_safe(st.session_state.vista, m_cub, m_sop, m_rev, st.session_state.color)
     if img_m: st.image(img_m, use_container_width=True)
-    
