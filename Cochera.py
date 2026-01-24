@@ -26,6 +26,16 @@ if 'vista' not in st.session_state: st.session_state.vista = "Cam"
 if 'color' not in st.session_state: st.session_state.color = "negro"
 if 'ultima_frase' not in st.session_state: st.session_state.ultima_frase = "Prueba las combinaciones"
 
+# --- FUNCIÓN PARA EL LOGO ---
+def mostrar_logo():
+    """Busca el logo y lo despliega"""
+    logo_path = "COCHERA-PARA-CESAR/logo.png" 
+    if os.path.exists(logo_path):
+        st.image(logo_path, use_container_width=True)
+    else:
+        # Si no hay imagen, un placeholder con el estilo de la marca
+        st.markdown("<h1 style='color: #00FF00; text-align: center;'>CESAR</h1>", unsafe_allow_html=True)
+
 # --- PANTALLA DE LOGIN ---
 if not st.session_state.autenticado:
     st.markdown("<h2 style='text-align: center; color: #00FF00;'>Acceso Privado</h2>", unsafe_allow_html=True)
@@ -45,7 +55,6 @@ if not st.session_state.autenticado:
 # --- FUNCIÓN DE RUTAS SEGURAS CON CACHÉ ---
 @st.cache_data
 def get_path_safe(v_target, cub, sop, rev, color_nom):
-    # El decorador memoriza la imagen para que la carga sea instantánea tras el primer clic
     CARPETA_IMAGENES = os.path.join(os.path.dirname(__file__), "renders")
     color_map = {"negro": "NEGRO", "gris": "GRIS", "rojo": "ROJO"}
     color_upper = color_map.get(color_nom, "NEGRO")
@@ -53,7 +62,6 @@ def get_path_safe(v_target, cub, sop, rev, color_nom):
     for cam_var in intentos:
         ruta = os.path.join(CARPETA_IMAGENES, f"{cub}_{sop}_{rev}_{cam_var}_{color_upper}.jpg")
         if os.path.exists(ruta): 
-            # Retornamos la ruta. Streamlit se encarga de optimizar la entrega.
             return ruta
     return None
 
@@ -85,7 +93,11 @@ if st.session_state.modo_dispositivo == "Computadora (Web Completa)":
     """, unsafe_allow_html=True)
 
     col_visor, col_ctrl = st.columns([3, 2])
+    
     with col_ctrl:
+        # Recuperamos el logo en la parte superior del panel de control
+        mostrar_logo()
+        
         st.markdown("<p class='main-title'>VISUALIZADOR PARA CESAR 🏠🚗</p>", unsafe_allow_html=True)
         st.markdown(f"<p class='phrase-box'>{st.session_state.ultima_frase}</p>", unsafe_allow_html=True)
         st.markdown("<hr>", unsafe_allow_html=True)
@@ -94,8 +106,10 @@ if st.session_state.modo_dispositivo == "Computadora (Web Completa)":
         with c_m:
             scub = st.selectbox("Cubierta", ["ConAlero", "SinAlero"], format_func=lambda x: "Compacta" if x=="SinAlero" else "Extendida")
             if st.session_state.get('p_cub') != scub: st.session_state.ultima_frase = frases[scub]; st.session_state.p_cub = scub; st.rerun()
+            
             ssop = st.selectbox("Soportes", ["Eficientes", "Dinamicos"], format_func=lambda x: "Esencial" if x=="Eficientes" else "Dinámico")
             if st.session_state.get('p_sop') != ssop: st.session_state.ultima_frase = frases[ssop]; st.session_state.p_sop = ssop; st.rerun()
+            
             srev = st.selectbox("Revestimiento", ["Ninguno", "Poco", "Mucho"], format_func=lambda x: "Base" if x=="Ninguno" else ("Parcial" if x=="Poco" else "Completo"))
             if st.session_state.get('p_rev') != srev: st.session_state.ultima_frase = frases[srev]; st.session_state.p_rev = srev; st.rerun()
         
@@ -142,6 +156,9 @@ else:
         </style>
     """, unsafe_allow_html=True)
 
+    # Logo centrado para móvil
+    mostrar_logo()
+    
     st.markdown(f"<p class='main-title-m'>VISUALIZADOR PARA CESAR 🏠🚗</p>", unsafe_allow_html=True)
     st.markdown(f"<p class='phrase-box-m'>{st.session_state.ultima_frase}</p>", unsafe_allow_html=True)
     
@@ -167,7 +184,7 @@ else:
     nombres_colores = {"negro": "NEGRO", "gris": "GRIS", "rojo": "TERRACOTA"}
     sig_col = colores_ciclo[(colores_ciclo.index(st.session_state.color) + 1) % 3]
     with c_btn1:
-        if st.button(f"🎨 PASAR A {nombres_colores[sig_col]}", key="btn_rotar_color", use_container_width=True):
+        if st.button(f"🎨 {nombres_colores[sig_col]}", key="btn_rotar_color", use_container_width=True):
             st.session_state.color = sig_col
             st.session_state.ultima_frase = frases[sig_col]
             st.rerun()
@@ -176,7 +193,7 @@ else:
     v_noms_m = {"Cam": "OBLICUA", "Cam_001": "FRONTAL", "Cam_002": "LATERAL"}
     sig_v = v_ciclo[(v_ciclo.index(st.session_state.vista) + 1) % 3]
     with c_btn2:
-        if st.button(f"🔄 VER VISTA {v_noms_m[sig_v]}", key="btn_rotar_vista", use_container_width=True):
+        if st.button(f"🔄 {v_noms_m[sig_v]}", key="btn_rotar_vista", use_container_width=True):
             st.session_state.vista = sig_v
             st.rerun()
 
