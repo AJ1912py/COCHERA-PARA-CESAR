@@ -71,6 +71,7 @@ def get_path_safe(v_target, cub, sop, rev, color_nom):
 # ==========================================
 # OPCIÓN A: MODO COMPUTADORA (WEB)
 # ==========================================
+
 if st.session_state.modo_dispositivo == "Computadora (Web Completa)":
     st.markdown("""
         <style>
@@ -100,19 +101,26 @@ if st.session_state.modo_dispositivo == "Computadora (Web Completa)":
     with col_ctrl:
         # Fila superior: Título y Logo
         c_tit, c_log = st.columns([3, 1])
+        
         with c_tit:
             st.markdown("<p class='main-title'>VISUALIZADOR PARA CESAR 🏠🚗</p>", unsafe_allow_html=True)
+        
         with c_log:
-            # Buscamos el logo en la raíz de la carpeta actual
-            logo_path = os.path.join(os.path.dirname(__file__), "logo.png")
+            # LÓGICA DE DETECCIÓN DEL LOGO
+            ruta_actual = os.path.dirname(__file__)
+            logo_path = os.path.join(ruta_actual, "logo.png")
+            
             if os.path.exists(logo_path):
                 st.image(logo_path, use_container_width=True)
+            else:
+                # MENSAJE DE DESCARTE: Si ves esto, es que el archivo no está en la carpeta correcta
+                st.warning(f"⚠️ No se encontró 'logo.png' en: {ruta_actual}")
         
-        # Frase descriptiva
+        # Frase descriptiva dinámica
         st.markdown(f"<p class='phrase-box'>{st.session_state.ultima_frase}</p>", unsafe_allow_html=True)
         st.markdown("<hr>", unsafe_allow_html=True)
         
-        # Selectores de configuración
+        # Selectores de Configuración
         c_m, c_c = st.columns([2.3, 1.2])
         with c_m:
             scub = st.selectbox("Cubierta", ["ConAlero", "SinAlero"], format_func=lambda x: "Compacta" if x=="SinAlero" else "Extendida")
@@ -133,7 +141,7 @@ if st.session_state.modo_dispositivo == "Computadora (Web Completa)":
                 st.session_state.p_rev = srev
                 st.rerun()
         
-        # Botones de Color
+        # Botones de Color (Círculos)
         with c_c:
             st.markdown("<div style='margin-top: 32px;'></div>", unsafe_allow_html=True)
             for k, l, cl, f in [("btn_negro","N","bg-negro","negro"), ("btn_gris","G","bg-gris","gris"), ("btn_rojo","R","bg-rojo","rojo")]:
@@ -148,7 +156,7 @@ if st.session_state.modo_dispositivo == "Computadora (Web Completa)":
 
         st.markdown("<hr>", unsafe_allow_html=True)
         
-        # Vistas secundarias (Miniaturas clicables)
+        # Galería de Vistas (Miniaturas)
         v_ids = ["Cam", "Cam_001", "Cam_002"]
         v_noms = {"Cam": "VISTA OBLICUA", "Cam_001": "VISTA FRONTAL", "Cam_002": "VISTA LATERAL"}
         v_mins = [v for v in v_ids if v != st.session_state.vista]
@@ -161,7 +169,7 @@ if st.session_state.modo_dispositivo == "Computadora (Web Completa)":
                 p = get_path_safe(vid, scub, ssop, srev, st.session_state.color)
                 if p: st.image(p, use_container_width=True)
 
-    # Visor de imagen principal
+    # El visor principal (Imagen Grande)
     with col_visor:
         img = get_path_safe(st.session_state.vista, scub, ssop, srev, st.session_state.color)
         if img: 
