@@ -1,6 +1,8 @@
 import streamlit as st
 import os
 
+st.write("Archivos detectados:", os.listdir("."))
+
 # 1. CONFIGURACIÓN Y ESTADO INICIAL
 st.set_page_config(page_title="Visualizador Cesar", page_icon="🏠", layout="wide")
 PASSWORD_CORRECTA = "CesarM"
